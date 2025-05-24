@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ArticleService } from '@/article/article.service';
 import { createArticleDto } from '@/article/dto/create-article.dto';
 import { FindOneParams } from '@/article/dto/find-one.params';
+import { UpdateArticleDto } from '@/article/dto/update-article.dto';
 import { IArticle } from '@/article/interface/article.interface';
 import {
   Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
@@ -33,13 +35,19 @@ export class ArticleController {
   }
 
   @Put(':id')
-  update(@Param() params: any): string {
-    return `This action updates a article with id: ${params.id}`;
+  update(
+    @Param() params: FindOneParams,
+    @Body() updateArticleDto: UpdateArticleDto,
+  ): IArticle {
+    const artile = this.findOneOrFail(params.id);
+    return this.articleService.updateArticle(artile, updateArticleDto);
   }
 
   @Delete(':id')
-  remove(@Param() params: any): string {
-    return `This action removes a article with id: ${params.id}`;
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param() params: FindOneParams): void {
+    const artile = this.findOneOrFail(params.id);
+    this.articleService.deleteArticle(artile);
   }
 
   private findOneOrFail(id: string): IArticle {
