@@ -1,9 +1,9 @@
 import { Role } from '@/auth/enum/role.enum';
-import { Optional } from '@nestjs/common';
 import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MinLength,
@@ -27,6 +27,6 @@ export class RegisterDto {
   password: string;
 
   @IsEnum(Role)
-  @Optional()
+  @IsOptional()
   role: Role;
 }
