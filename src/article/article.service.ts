@@ -1,41 +1,41 @@
 import { createArticleDto } from '@/article/dto/create-article.dto';
 import { UpdateArticleDto } from '@/article/dto/update-article.dto';
-import { IArticle } from '@/article/interface/article.interface';
+import { Article } from '@/article/entities/article.entity';
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArticleService {
-  private articles: IArticle[] = [];
+  constructor(
+    @InjectRepository(Article)
+    private ArticleRepository: Repository<Article>,
+  ) {}
 
-  createArticle(createArticleDto: createArticleDto) {
-    const article: IArticle = {
-      id: uuidv4(),
-      ...createArticleDto,
-    };
-    this.articles.push(article);
-    return article;
+  async createArticle(createArticleDto: createArticleDto): Promise<Article> {
+    const newArticle = await this.ArticleRepository.save(createArticleDto);
+    return newArticle;
   }
 
-  findAllArticles(): IArticle[] {
-    return this.articles;
+  async findAllArticles(): Promise<Article[]> {
+    return await this.ArticleRepository.find();
   }
 
-  findOneByParams(id: string): IArticle | undefined {
-    return this.articles.find((article) => article.id === id);
+  async findOneByParams(id: string): Promise<Article | null> {
+    return await this.ArticleRepository.findOne({
+      where: { id },
+    });
   }
 
-  updateArticle(
-    article: IArticle,
+  async updateArticle(
+    article: Article,
     updateArticleDto: UpdateArticleDto,
-  ): IArticle {
-    Object.assign(article, updateArticleDto);
-    return article;
+  ): Promise<Article> {
+    const updatedArticle = Object.assign(article, updateArticleDto);
+    return await this.ArticleRepository.save(updatedArticle);
   }
 
-  deleteArticle(articleData: IArticle): void {
-    this.articles = this.articles.filter(
-      (article) => article.id !== articleData.id,
-    );
+  async deleteArticle(articleData: Article): Promise<void> {
+    await this.ArticleRepository.delete(articleData.id);
   }
 }

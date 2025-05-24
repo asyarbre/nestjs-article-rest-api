@@ -2,14 +2,12 @@ import { ArticleService } from '@/article/article.service';
 import { createArticleDto } from '@/article/dto/create-article.dto';
 import { FindOneParams } from '@/article/dto/find-one.params';
 import { UpdateArticleDto } from '@/article/dto/update-article.dto';
-import { IArticle } from '@/article/interface/article.interface';
+import { Article } from '@/article/entities/article.entity';
 import {
   Body,
   Controller,
   Delete,
   Get,
-  HttpCode,
-  HttpStatus,
   NotFoundException,
   Param,
   Post,
@@ -19,43 +17,43 @@ import {
 @Controller('article')
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
+
+  private async findOneOrFail(id: string): Promise<Article> {
+    const article = await this.articleService.findOneByParams(id);
+    if (!article) {
+      throw new NotFoundException(`Article with id ${id} not found`);
+    }
+    return article;
+  }
+
   @Get()
-  findAll(): IArticle[] {
-    return this.articleService.findAllArticles();
+  async findAll(): Promise<Article[]> {
+    return await this.articleService.findAllArticles();
   }
 
   @Get(':id')
-  findOne(@Param() params: FindOneParams): IArticle {
-    return this.findOneOrFail(params.id);
+  async findOne(@Param() params: FindOneParams): Promise<Article> {
+    return await this.findOneOrFail(params.id);
   }
 
   @Post()
-  create(@Body() createArticleDto: createArticleDto): IArticle {
-    return this.articleService.createArticle(createArticleDto);
+  async create(@Body() createArticleDto: createArticleDto): Promise<Article> {
+    return await this.articleService.createArticle(createArticleDto);
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param() params: FindOneParams,
     @Body() updateArticleDto: UpdateArticleDto,
-  ): IArticle {
-    const artile = this.findOneOrFail(params.id);
-    return this.articleService.updateArticle(artile, updateArticleDto);
+  ): Promise<Article> {
+    const article = await this.findOneOrFail(params.id);
+    return await this.articleService.updateArticle(article, updateArticleDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param() params: FindOneParams): void {
-    const artile = this.findOneOrFail(params.id);
-    this.articleService.deleteArticle(artile);
-  }
-
-  private findOneOrFail(id: string): IArticle {
-    const artile = this.articleService.findOneByParams(id);
-    if (!artile) {
-      throw new NotFoundException();
-    }
-
-    return artile;
+  async remove(@Param() params: FindOneParams): Promise<{ message: string }> {
+    const article = await this.findOneOrFail(params.id);
+    await this.articleService.deleteArticle(article);
+    return { message: `Article with id ${params.id} deleted successfully` };
   }
 }
