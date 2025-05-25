@@ -3,6 +3,10 @@ import { createArticleDto } from '@/article/dto/create-article.dto';
 import { FindOneParams } from '@/article/dto/find-one.params';
 import { UpdateArticleDto } from '@/article/dto/update-article.dto';
 import { Article } from '@/article/entities/article.entity';
+import { Roles } from '@/auth/decolators/roles.decolator';
+import { Role } from '@/auth/enum/role.enum';
+import { AuthGuard } from '@/auth/guard/auth.guard';
+import { RolesGuard } from '@/auth/guard/role.guard';
 import {
   Body,
   Controller,
@@ -12,7 +16,18 @@ import {
   Param,
   Post,
   Put,
+  UseInterceptors,
+  UploadedFile,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+  };
+}
 
 @Controller('article')
 export class ArticleController {
@@ -36,9 +51,21 @@ export class ArticleController {
     return await this.findOneOrFail(params.id);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Post()
-  async create(@Body() createArticleDto: createArticleDto): Promise<Article> {
-    return await this.articleService.createArticle(createArticleDto);
+  async create(
+    @Request() req: AuthenticatedRequest,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createArticleDto: createArticleDto,
+  ): Promise<Article> {
+    console.log(file);
+    return await this.articleService.createArticle(
+      req.user.id,
+      createArticleDto,
+      file,
+    );
   }
 
   @Put(':id')
