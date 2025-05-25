@@ -1,3 +1,4 @@
+import { Article } from '@/article/entities/article.entity';
 import { Role } from '@/auth/enum/role.enum';
 import { Profile } from '@/profile/entities/profile.entity';
 import { Exclude } from 'class-transformer';
@@ -5,6 +6,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -40,4 +42,7 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
+
+  @OneToMany(() => Article, (article) => article.id)
+  articles: Article[];
 }

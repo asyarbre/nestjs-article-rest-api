@@ -1,8 +1,11 @@
 import { ArticleStatus } from '@/article/interface/article.interface';
+import { User } from '@/auth/entities/user.entity';
+import { Category } from '@/category/entities/category.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -27,9 +30,28 @@ export class Article {
   })
   status: string;
 
+  @Column({
+    nullable: true,
+  })
+  image: string;
+
+  @ManyToOne(() => Category, (category) => category.id)
+  category: Category;
+  @Column({
+    type: 'uuid',
+  })
+  categoryId: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
+  @Column({
+    type: 'uuid',
+  })
+  userId: string;
+
   @CreateDateColumn()
-  readonly createdAt: Date;
+  readonly createdAt!: Date;
 
   @UpdateDateColumn()
-  readonly updatedAt: Date;
+  readonly updatedAt!: Date;
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Article } from '@/article/entities/article.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Category {
@@ -7,4 +8,7 @@ export class Category {
 
   @Column({ type: 'varchar', length: 255 })
   name: string;
+
+  @OneToMany(() => Article, (article) => article.id)
+  articles: Article[];
 }
