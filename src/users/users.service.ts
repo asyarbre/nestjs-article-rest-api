@@ -22,8 +22,12 @@ export class UsersService {
   async updateRoleUser(
     user: User,
     updateRoleDto: UpdateRoleDto,
-  ): Promise<User> {
+  ): Promise<{ user: User; message: string }> {
     Object.assign(user, updateRoleDto);
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+    return {
+      user,
+      message: 'User role updated successfully',
+    };
   }
 }

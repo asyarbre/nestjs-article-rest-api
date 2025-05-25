@@ -45,7 +45,7 @@ export class UsersController {
   async update(
     @Param() params: UserFindOneParams,
     @Body() updateRoleDto: UpdateRoleDto,
-  ): Promise<User> {
+  ) {
     const user = await this.findOneOrFail(params.id);
     return await this.usersService.updateRoleUser(user, updateRoleDto);
   }
