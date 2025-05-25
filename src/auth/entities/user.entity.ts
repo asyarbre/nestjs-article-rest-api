@@ -1,9 +1,11 @@
 import { Role } from '@/auth/enum/role.enum';
+import { Profile } from '@/profile/entities/profile.entity';
 import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -35,4 +37,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToOne(() => Profile, (profile) => profile.user)
+  profile: Profile;
 }
