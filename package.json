@@ -24,6 +24,7 @@
     "migration:run:prod": "typeorm migration:run -d dist/typeorm.config.js"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.16.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
@@ -36,6 +37,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "dotenv": "^16.5.0",
+    "multer": "^2.0.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.16.0",
@@ -56,6 +58,7 @@
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.12",
     "@types/node": "^22.10.7",
     "@types/passport": "^1.0.17",
     "@types/passport-jwt": "^4.0.1",
