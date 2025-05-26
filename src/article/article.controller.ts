@@ -68,19 +68,34 @@ export class ArticleController {
     );
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   @Put(':id')
   async update(
+    @Request() req: AuthenticatedRequest,
     @Param() params: FindOneParams,
     @Body() updateArticleDto: UpdateArticleDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<Article> {
     const article = await this.findOneOrFail(params.id);
-    return await this.articleService.updateArticle(article, updateArticleDto);
+    return await this.articleService.updateArticle(
+      req.user.id,
+      article,
+      updateArticleDto,
+      file,
+    );
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete(':id')
-  async remove(@Param() params: FindOneParams): Promise<{ message: string }> {
+  async remove(
+    @Request() req: AuthenticatedRequest,
+    @Param() params: FindOneParams,
+  ): Promise<{ message: string }> {
     const article = await this.findOneOrFail(params.id);
-    await this.articleService.deleteArticle(article);
+    await this.articleService.deleteArticle(req.user.id, article);
     return { message: `Article with id ${params.id} deleted successfully` };
   }
 }
