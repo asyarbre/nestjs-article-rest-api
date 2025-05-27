@@ -1,4 +1,5 @@
 import { ArticleService } from '@/article/article.service';
+import { ArticleQueryDto } from '@/article/dto/article-query.dto';
 import { createArticleDto } from '@/article/dto/create-article.dto';
 import { FindOneParams } from '@/article/dto/find-one.params';
 import { UpdateArticleDto } from '@/article/dto/update-article.dto';
@@ -20,6 +21,7 @@ import {
   UploadedFile,
   Request,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -42,8 +44,8 @@ export class ArticleController {
   }
 
   @Get()
-  async findAll(): Promise<Article[]> {
-    return await this.articleService.findAllArticles();
+  async findAll(@Query() query: ArticleQueryDto) {
+    return await this.articleService.findAllArticles(query);
   }
 
   @Get(':id')

@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { StorageService } from '../common/gcs/storage.service';
 import { Category } from '@/category/entities/category.entity';
+import { ArticleQueryDto } from '@/article/dto/article-query.dto';
 
 @Injectable()
 export class ArticleService {
@@ -51,8 +52,51 @@ export class ArticleService {
     return await this.ArticleRepository.save(newArticle);
   }
 
-  async findAllArticles(): Promise<Article[]> {
-    return await this.ArticleRepository.find();
+  async findAllArticles(query: ArticleQueryDto) {
+    const {
+      title,
+      categoryId,
+      page = 1,
+      limit = 3,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query;
+
+    //pagination
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.ArticleRepository.createQueryBuilder('article')
+      .innerJoinAndSelect('article.category', 'category')
+      .innerJoinAndSelect('article.user', 'user');
+
+    // searching
+    if (title) {
+      queryBuilder.andWhere('article.title ILIKE :title', {
+        title: `%${title}%`,
+      });
+    }
+
+    // filtering by category
+    if (categoryId) {
+      queryBuilder.andWhere('article.categoryId = :categoryId', {
+        categoryId,
+      });
+    }
+
+    // relations
+    const [articles, total] = await queryBuilder
+      .orderBy(`article.${sortBy}`, sortOrder.toUpperCase() as 'ASC' | 'DESC')
+      .skip(skip)
+      .take(limit)
+      .select(['article', 'category.name', 'user.name', 'user.email'])
+      .getManyAndCount();
+
+    return {
+      articles,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
   }
 
   async findOneByParams(id: string): Promise<Article | null> {
