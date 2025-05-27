@@ -1,5 +1,11 @@
 import { ArticleStatus } from '@/article/interface/article.interface';
-import { IsEnum, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class createArticleDto {
   @IsNotEmpty()
@@ -17,4 +23,7 @@ export class createArticleDto {
   @IsNotEmpty()
   @IsUUID()
   categoryId: string;
+
+  @IsOptional()
+  tags: string[];
 }

@@ -11,6 +11,8 @@ import { Repository } from 'typeorm';
 import { StorageService } from '../common/gcs/storage.service';
 import { Category } from '@/category/entities/category.entity';
 import { ArticleQueryDto } from '@/article/dto/article-query.dto';
+import { Tag } from '@/tag/entities/tag.entity';
+import { ArticleTag } from '@/articleTag/entities/articletag.entity';
 
 @Injectable()
 export class ArticleService {
@@ -20,6 +22,12 @@ export class ArticleService {
 
     @InjectRepository(Category)
     private CategoryRepository: Repository<Category>,
+
+    @InjectRepository(Tag)
+    private TagRepository: Repository<Tag>,
+
+    @InjectRepository(ArticleTag)
+    private ArticleTagRepository: Repository<ArticleTag>,
 
     private storageService: StorageService,
   ) {}
@@ -49,7 +57,26 @@ export class ArticleService {
       userId,
     });
 
-    return await this.ArticleRepository.save(newArticle);
+    await this.ArticleRepository.save(newArticle);
+
+    for (const tagName of createArticleDto.tags) {
+      let tag = await this.TagRepository.findOne({
+        where: { name: tagName.toLocaleLowerCase() },
+      });
+      if (!tag) {
+        tag = this.TagRepository.create({ name: tagName.toLocaleLowerCase() });
+        await this.TagRepository.save(tag);
+      }
+
+      const articleTag = this.ArticleTagRepository.create({
+        article: newArticle,
+        tag,
+      });
+
+      await this.ArticleTagRepository.save(articleTag);
+    }
+
+    return newArticle;
   }
 
   async findAllArticles(query: ArticleQueryDto) {
@@ -102,7 +129,7 @@ export class ArticleService {
   async findOneByParams(id: string): Promise<Article | null> {
     return await this.ArticleRepository.findOne({
       where: { id },
-      relations: ['category', 'user'],
+      relations: ['category', 'user', 'articleTags', 'articleTags.tag'],
       select: {
         id: true,
         title: true,
@@ -120,6 +147,13 @@ export class ArticleService {
           name: true,
           email: true,
           role: true,
+        },
+        articleTags: {
+          id: true,
+          tag: {
+            id: true,
+            name: true,
+          },
         },
       },
     });

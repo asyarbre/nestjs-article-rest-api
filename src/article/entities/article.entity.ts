@@ -1,4 +1,5 @@
 import { ArticleStatus } from '@/article/interface/article.interface';
+import { ArticleTag } from '@/articleTag/entities/articletag.entity';
 import { User } from '@/auth/entities/user.entity';
 import { Category } from '@/category/entities/category.entity';
 import {
@@ -6,6 +7,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -48,6 +50,9 @@ export class Article {
     type: 'uuid',
   })
   userId: string;
+
+  @OneToMany(() => ArticleTag, (articletag) => articletag.article)
+  articleTags: ArticleTag[];
 
   @CreateDateColumn()
   readonly createdAt!: Date;
