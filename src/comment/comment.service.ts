@@ -47,4 +47,21 @@ export class CommentService {
       return { message: 'Comment updated successfully' };
     }
   }
+
+  async isValidComment(
+    userId: string,
+    articleId: string,
+  ): Promise<{ status: boolean; id?: string }> {
+    const comment = await this.CommentRepository.findOne({
+      where: {
+        articleId,
+        userId,
+      },
+    });
+    if (comment) {
+      return { status: true, id: comment.id };
+    } else {
+      return { status: false };
+    }
+  }
 }

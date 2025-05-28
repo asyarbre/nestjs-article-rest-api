@@ -1,7 +1,15 @@
 import { AuthGuard } from '@/auth/guard/auth.guard';
 import { CommentService } from '@/comment/comment.service';
 import { CreateUpdateCommentDto } from '@/comment/dto/create-update-comment.dto';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -22,5 +30,13 @@ export class CommentController {
       req.user.id,
       createUpdateCommentDto,
     );
+  }
+
+  @Get(':articleId')
+  async isValidComment(
+    @Request() req: AuthenticatedRequest,
+    @Param('articleId') articleId: string,
+  ): Promise<{ status: boolean; id?: string }> {
+    return await this.commentService.isValidComment(req.user.id, articleId);
   }
 }
