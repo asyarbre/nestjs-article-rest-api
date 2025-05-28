@@ -126,6 +126,45 @@ export class ArticleService {
     };
   }
 
+  async getArticleByUser(userId: string, query: ArticleQueryDto) {
+    const {
+      title,
+      page = 1,
+      limit = 3,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+    } = query;
+
+    //pagination
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.ArticleRepository.createQueryBuilder(
+      'article',
+    ).innerJoinAndSelect('article.category', 'category');
+
+    // searching
+    if (title) {
+      queryBuilder.andWhere('article.title ILIKE :title', {
+        title: `%${title}%`,
+      });
+    }
+
+    const [articles, total] = await queryBuilder
+      .orderBy(`article.${sortBy}`, sortOrder.toUpperCase() as 'ASC' | 'DESC')
+      .skip(skip)
+      .take(limit)
+      .where('article.userId = :userId', { userId })
+      .select(['article', 'category.name'])
+      .getManyAndCount();
+
+    return {
+      articles,
+      total,
+      page,
+      lastPage: Math.ceil(total / limit),
+    };
+  }
+
   async findOneByParams(id: string): Promise<Article | null> {
     return await this.ArticleRepository.findOne({
       where: { id },

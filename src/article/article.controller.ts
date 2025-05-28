@@ -48,6 +48,16 @@ export class ArticleController {
     return await this.articleService.findAllArticles(query);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('/user')
+  async findAllByUser(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: ArticleQueryDto,
+  ) {
+    return await this.articleService.getArticleByUser(req.user.id, query);
+  }
+
   @Get(':id')
   async findOne(@Param() params: FindOneParams): Promise<Article> {
     return await this.findOneOrFail(params.id);
